@@ -85,11 +85,19 @@ func SetVaultState(isLocked bool) error {
     return DB.Save(&state).Error
 }
 
-func SetMasterPassword(password string) error {
+func SetMasterPassword(password string, isMasterPasswordSet bool) error {
+    if isMasterPasswordSet {
+        // A master password exists, delete the old one
+        if err := DB.Delete(&MasterPassword{}).Error; err != nil {
+            return fmt.Errorf("failed to delete old master password: %w", err)
+        }
+    }
+
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
 	}
+
 	masterPassword := MasterPassword{HashedPassword: string(hashedPassword)}
 	return DB.Create(&masterPassword).Error
 }
@@ -126,8 +134,10 @@ func AddSensitiveData(service, identifier, value, idType string) error {
 		return fmt.Errorf("could not retrieve master password: %v", err)
 	}
 
+    key := DeriveAESKey(masterPassword.HashedPassword)
+
 	// Encrypt the value using the hashed master password
-	encryptedValue, err := Encrypt(value, []byte(masterPassword.HashedPassword))
+	encryptedValue, err := Encrypt(value, key)
 	if err != nil {
 		return fmt.Errorf("error encrypting sensitive data: %v", err)
 	}
@@ -161,9 +171,11 @@ func GetSensitiveData(service, identifier string) ([]SensitiveData, error) {
 		return nil, fmt.Errorf("could not retrieve master password: %v", err)
 	}
 
+    key := DeriveAESKey(masterPassword.HashedPassword)
+
 	// Decrypt the sensitive data values
 	for i, data := range sensitiveData {
-		decryptedValue, err := Decrypt(data.Value, []byte(masterPassword.HashedPassword))
+		decryptedValue, err := Decrypt(data.Value, key)
 		if err != nil {
 			return nil, fmt.Errorf("error decrypting sensitive data: %v", err)
 		}
@@ -197,9 +209,11 @@ func ListSensitiveData(idType string) ([]SensitiveData, error) {
 		return nil, fmt.Errorf("could not retrieve master password: %v", err)
 	}
 
+    key := DeriveAESKey(masterPassword.HashedPassword)
+
 	// Decrypt the sensitive data values
 	for i, entry := range entries {
-		decryptedValue, err := Decrypt(entry.Value, []byte(masterPassword.HashedPassword))
+		decryptedValue, err := Decrypt(entry.Value, key)
 		if err != nil {
 			return nil, fmt.Errorf("error decrypting sensitive data: %v", err)
 		}

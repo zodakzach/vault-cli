@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"crypto/sha256"
 )
 
 // ParseIdentifierType attempts to convert a string to IdentifierType
@@ -24,6 +25,12 @@ func ParseIdentifierType(idType string) (IdentifierType, error) {
 	default:
 		return "", fmt.Errorf("invalid identifier type: %s", idType)
 	}
+}
+
+// DeriveAESKey derives a 32-byte AES key from the bcrypt-hashed password using SHA-256
+func DeriveAESKey(hashedPassword string) []byte {
+	hash := sha256.Sum256([]byte(hashedPassword))
+	return hash[:]
 }
 
 // Encrypt encrypts the given plaintext using the provided key

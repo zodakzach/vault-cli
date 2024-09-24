@@ -33,4 +33,6 @@ func init() {
     // Add subcommands to rootCmd
     rootCmd.AddCommand(setMasterCmd)
     rootCmd.AddCommand(unlockCmd)
+    rootCmd.AddCommand(lockCmd)
+    rootCmd.AddCommand(addCmd)
 }
