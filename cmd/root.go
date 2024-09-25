@@ -40,4 +40,6 @@ func init() {
     rootCmd.AddCommand(getCmd)
     rootCmd.AddCommand(updateCmd) 
     rootCmd.AddCommand(generateCmd)
+    rootCmd.AddCommand(exportCmd)
+    rootCmd.AddCommand(importCmd)
 }

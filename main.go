@@ -8,7 +8,7 @@ import (
 
 func main() {
     // Initialize the database
-    if err := database.InitDB(); err != nil {
+    if err := database.InitDB("vault.db"); err != nil {
         log.Fatalf("Could not initialize the database: %v", err)
     }
 

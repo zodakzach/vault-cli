@@ -4,6 +4,7 @@ import (
     "fmt"
     "github.com/spf13/cobra"
     db "data-manager/database"
+    "data-manager/vault" // Make sure to import the vault package for timer control
 )
 
 var unlockCmd = &cobra.Command{
@@ -29,13 +30,11 @@ var unlockCmd = &cobra.Command{
             return
         }
 
-		err = db.SetVaultState(false)
+		err = vault.UnlockVault()
 		if err != nil {
             fmt.Println("Error unlocking the vault:", err)
             return
         }
-
-        fmt.Println("Vault unlocked successfully.")
     },
 }
 

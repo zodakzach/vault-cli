@@ -12,9 +12,9 @@ import (
 
 var DB *gorm.DB
 
-func InitDB() error {
+func InitDB(dbName string) error {
 	var err error
-	DB, err = gorm.Open(sqlite.Open("vault.db"), &gorm.Config{})
+	DB, err = gorm.Open(sqlite.Open(dbName), &gorm.Config{})
 	if err != nil {
 		return err
 	}
@@ -105,7 +105,7 @@ func SetMasterPassword(password string, isMasterPasswordSet bool) error {
 
 func VerifyMasterPassword(inputPassword string) (bool, error) {
 	var masterPassword MasterPassword
-	err := DB.Last(&masterPassword).Error
+	err := DB.First(&masterPassword).Error
 	if err != nil {
 		return false, err
 	}
