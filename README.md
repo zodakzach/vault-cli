@@ -7,7 +7,7 @@
    - **Description**: Add a new password entry to the vault.
    - **Usage**:
      ```bash
-     <root> add --service "Service Name" --username "user@example.com" --password "password123"
+     <root> add --service "Service Name" --username "user@example.com" --value "password123"
      <root> add --service "Service Name" --username "user@example.com" --generate
      ```
 
@@ -60,13 +60,6 @@
      <root> set-master --password "newmasterpassword"
      ```
 
-9. **`search`**:
-   - **Description**: Search for a service or username in the vault using fuzzy search.
-   - **Usage**:
-     ```bash
-     <root> search --query "searchterm"
-     ```
-
 10. **`import`**:
     - **Description**: Import password entries from a file (CSV or JSON).
     - **Usage**:
@@ -79,20 +72,6 @@
     - **Usage**:
       ```bash
       <root> export --file "path/to/file.csv" --format csv
-      ```
-
-12. **`backup`**:
-    - **Description**: Create an encrypted backup of the password database.
-    - **Usage**:
-      ```bash
-      <root> backup --file "path/to/backup.enc"
-      ```
-
-13. **`restore`**:
-    - **Description**: Restore the vault from an encrypted backup file.
-    - **Usage**:
-      ```bash
-      <root> restore --file "path/to/backup.enc"
       ```
 
 14. **`unlock`**:

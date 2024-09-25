@@ -3,6 +3,7 @@ package database
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/sqlite"
@@ -122,6 +123,10 @@ func CheckMasterPasswordSet() error {
 }
 
 func AddSensitiveData(service, identifier, value, idType string) error {
+    // Normalize service and identifier to lowercase
+    normalizedService := strings.ToLower(service)
+    normalizedIdentifier := strings.ToLower(identifier)
+
 	// Use the utility function to validate and convert idType
 	identifierType, err := ParseIdentifierType(idType)
 	if err != nil {
@@ -143,49 +148,55 @@ func AddSensitiveData(service, identifier, value, idType string) error {
 	}
 
 	sensitiveData := SensitiveData{
-		Service:        service,
-		Identifier:     identifier,
+		Service:        normalizedService,
+		Identifier:     normalizedIdentifier,
 		Value:          encryptedValue,
 		IdentifierType: identifierType,
 	}
 	return DB.Create(&sensitiveData).Error
 }
 
-func GetSensitiveData(service, identifier string) ([]SensitiveData, error) {
-	var sensitiveData []SensitiveData
-	query := DB.Where("service = ?", service)
+func GetSensitiveData(service, identifier string) (SensitiveData, error) {
+    var sensitiveData SensitiveData
 
-	// If identifier is provided, filter by it
-	if identifier != "" {
-		query = query.Where("identifier = ?", identifier)
-	}
+    // Normalize service and identifier to lowercase for case-insensitive search
+    normalizedService := strings.ToLower(service)
+    normalizedIdentifier := strings.ToLower(identifier)
 
-	err := query.Find(&sensitiveData).Error
-	if err != nil {
-		return nil, err // Return nil slice and the error
-	}
+    // Query database for matching service and identifier
+    err := DB.Where("service = ?", normalizedService).
+        Where("identifier = ?", normalizedIdentifier).
+        First(&sensitiveData).Error
 
-	// Retrieve the hashed master password
-	var masterPassword MasterPassword
-	if err := DB.First(&masterPassword).Error; err != nil {
-		return nil, fmt.Errorf("could not retrieve master password: %v", err)
-	}
+    if err != nil {
+        if errors.Is(err, gorm.ErrRecordNotFound) {
+            return SensitiveData{}, fmt.Errorf("no data found for service '%s' and identifier '%s'", service, identifier)
+        }
+        return SensitiveData{}, fmt.Errorf("error querying sensitive data: %w", err)
+    }
 
+    // Retrieve the hashed master password from the database
+    var masterPassword MasterPassword
+    if err := DB.First(&masterPassword).Error; err != nil {
+        return SensitiveData{}, fmt.Errorf("could not retrieve master password: %v", err)
+    }
+
+    // Derive the encryption key from the hashed master password
     key := DeriveAESKey(masterPassword.HashedPassword)
 
-	// Decrypt the sensitive data values
-	for i, data := range sensitiveData {
-		decryptedValue, err := Decrypt(data.Value, key)
-		if err != nil {
-			return nil, fmt.Errorf("error decrypting sensitive data: %v", err)
-		}
-		sensitiveData[i].Value = decryptedValue // Replace the encrypted value with the decrypted one
-	}
+    // Decrypt the sensitive data value
+    decryptedValue, err := Decrypt(sensitiveData.Value, key)
+    if err != nil {
+        return SensitiveData{}, fmt.Errorf("error decrypting sensitive data: %v", err)
+    }
 
-	return sensitiveData, nil
+    // Replace the encrypted value with the decrypted value
+    sensitiveData.Value = decryptedValue
+
+    return sensitiveData, nil
 }
 
-func ListSensitiveData(idType string) ([]SensitiveData, error) {
+func GetAllSensitiveData(idType string) ([]SensitiveData, error) {
 	var entries []SensitiveData
 	query := DB
 
@@ -221,4 +232,73 @@ func ListSensitiveData(idType string) ([]SensitiveData, error) {
 	}
 
 	return entries, nil
+}
+
+func DeleteSensitiveData(service, identifier string) error {
+	var entry SensitiveData
+    // Normalize service and identifier to lowercase
+    normalizedService := strings.ToLower(service)
+    normalizedIdentifier := strings.ToLower(identifier)
+
+	// Attempt to find the entry based on service and identifier
+	err := DB.Where("service = ? AND identifier = ?", normalizedService, normalizedIdentifier).First(&entry).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return fmt.Errorf("no entry found for service '%s' and identifier '%s'", service, identifier)
+		}
+		return fmt.Errorf("error finding the entry: %w", err)
+	}
+
+	// Attempt to delete the entry
+	if err := DB.Unscoped().Delete(&entry).Error; err != nil {
+		return fmt.Errorf("error deleting the entry: %w", err)
+	}
+
+	return nil
+}
+
+func UpdateSensitiveData(service, identifier, newValue, newIdentifier string) error {
+    var entry SensitiveData
+
+    // Normalize service and identifier to lowercase
+    normalizedService := strings.ToLower(service)
+    normalizedIdentifier := strings.ToLower(identifier)
+
+    // Find the existing entry based on the service and identifier
+    err := DB.Where("service = ? AND identifier = ?", normalizedService, normalizedIdentifier).First(&entry).Error
+    if err != nil {
+        if errors.Is(err, gorm.ErrRecordNotFound) {
+            return fmt.Errorf("no entry found for service '%s' and identifier '%s'", service, identifier)
+        }
+        return fmt.Errorf("error finding the entry: %w", err)
+    }
+
+    // Update the value if a new value is provided
+    if newValue != "" {
+		// Retrieve the hashed master password from the database
+		var masterPassword MasterPassword
+		if err := DB.First(&masterPassword).Error; err != nil {
+			return fmt.Errorf("could not retrieve master password: %v", err)
+		}
+		// Derive the AES key from the hashed master password
+		key := DeriveAESKey(masterPassword.HashedPassword)
+        // Encrypt the new value using the hashed master password
+        encryptedValue, err := Encrypt(newValue, key)
+        if err != nil {
+            return fmt.Errorf("error encrypting sensitive data: %v", err)
+        }
+        entry.Value = encryptedValue // Update the value with the encrypted one
+    }
+
+    // Update the identifier if a new identifier is provided
+    if newIdentifier != "" {
+        entry.Identifier = newIdentifier // Update the identifier
+    }
+
+    // Save the updated entry
+    if err := DB.Save(&entry).Error; err != nil {
+        return fmt.Errorf("error updating the entry: %w", err)
+    }
+
+    return nil
 }

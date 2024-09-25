@@ -15,3 +15,4 @@ func GenerateRandomPassword(length int) (string, error) {
 	// Use base64 encoding to generate a readable password
 	return base64.RawStdEncoding.EncodeToString(bytes)[:length], nil
 }
+

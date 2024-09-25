@@ -1,10 +1,16 @@
 package cmd
 
 import (
+	"bufio"
 	db "data-manager/database"
 	"fmt"
+	"os"
+	"strings"
+	"syscall"
 
+	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
+	"golang.org/x/term"
 )
 
 var addCmd = &cobra.Command{
@@ -13,9 +19,6 @@ var addCmd = &cobra.Command{
 	Long:  `Add a new sensitive data entry to the vault with the specified service, identifier, and value.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		service, _ := cmd.Flags().GetString("service")
-		identifier, _ := cmd.Flags().GetString("identifier")
-		value, _ := cmd.Flags().GetString("value")
-		idType, _ := cmd.Flags().GetString("id-type")
 
         // Check if the vault is locked
         isLocked, err := db.GetVaultState()
@@ -29,18 +32,18 @@ var addCmd = &cobra.Command{
             return
         }
 
-		if service == "" || identifier == "" {
-			fmt.Println("Error: Service and identifier are required.")
-			return
-		}
+		// Prompt for identifier type
+		idType := promptIdentifierType()
 
-		if err = db.CheckMasterPasswordSet(); err != nil {
-			fmt.Println(err)
-			return
-		}
+		// Prompt for identifier based on selected identifier type
+		identifier := promptForIdentifier(idType)
+
+		value := promptPassword("Enter data value for the service (or press Enter to auto-generate): ")
 
 		// Automatically generate a random password if not provided
 		if value == "" {
+			// Auto-generate a password if none provided
+			fmt.Println("No password entered. Generating a random password...")
 			value, err = GenerateRandomPassword(12) // Adjust the length as needed
 			if err != nil {
 				fmt.Println("Error generating password:", err)
@@ -62,11 +65,62 @@ var addCmd = &cobra.Command{
 
 func init() {
 	addCmd.Flags().StringP("service", "s", "", "Service name (required)")
-	addCmd.Flags().StringP("identifier", "i", "", "Identifier (required)")
-	addCmd.Flags().StringP("value", "v", "", "Value (optional)")
-	addCmd.Flags().StringP("id-type", "t", "username", "Identifier type (e.g., username, email, api_key, secret_key)")
 
 	addCmd.MarkFlagRequired("service")
-	addCmd.MarkFlagRequired("identifier")
-	addCmd.MarkFlagRequired("id-type") // Ensure id-type is also required
+}
+
+// promptIdentifierType prompts the user to select an identifier type using arrow keys
+func promptIdentifierType() string {
+	// Available identifier types
+	idTypes := []string{"username", "email", "api_key", "secret_key"}
+
+	// Prompt UI for selecting the identifier type
+	prompt := promptui.Select{
+		Label: "Select an identifier type",
+		Items: idTypes,
+	}
+
+	// Run the prompt and get the selected index
+	_, selectedType, err := prompt.Run()
+	if err != nil {
+		fmt.Printf("Prompt failed %v\n", err)
+		return ""
+	}
+
+	return selectedType
+}
+
+// promptForIdentifier prompts the user for an identifier value based on the identifier type
+func promptForIdentifier(idType string) string {
+	var prompt string
+	switch idType {
+	case "username":
+		prompt = "Enter the username: "
+	case "email":
+		prompt = "Enter the email address: "
+	case "api_key":
+		prompt = "Enter the API key: "
+	case "secret_key":
+		prompt = "Enter the secret key: "
+	default:
+		prompt = "Enter the identifier: "
+	}
+
+	fmt.Print(prompt)
+	reader := bufio.NewReader(os.Stdin)
+	identifier, _ := reader.ReadString('\n')
+
+	return strings.TrimSpace(identifier)
+}
+
+// promptPassword prompts the user for a password and hides input
+func promptPassword(prompt string) string {
+	fmt.Print(prompt)
+	bytePassword, err := term.ReadPassword(int(syscall.Stdin))
+	fmt.Println() // Move to the next line after password input
+	if err != nil {
+		fmt.Println("Error reading password:", err)
+		os.Exit(1)
+	}
+	return strings.TrimSpace(string(bytePassword))
 }

@@ -8,8 +8,8 @@ import (
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
     Use:   "vault", // The name of your command
-    Short: "A secure password manager", // Short description
-    Long:  `Vault is a secure password manager for storing and retrieving your passwords from the terminal.`,
+    Short: "A secure sensitive data manager", // Short description
+    Long:  `Vault is a secure sensitive data manager for storing and retrieving your sensitive data from the terminal.`,
     Run: func(cmd *cobra.Command, args []string) {
         // Default action when no subcommands are provided
         cmd.Help() // Show help if no subcommand is given
@@ -35,4 +35,9 @@ func init() {
     rootCmd.AddCommand(unlockCmd)
     rootCmd.AddCommand(lockCmd)
     rootCmd.AddCommand(addCmd)
+    rootCmd.AddCommand(deleteCmd)
+    rootCmd.AddCommand(listCmd)
+    rootCmd.AddCommand(getCmd)
+    rootCmd.AddCommand(updateCmd) 
+    rootCmd.AddCommand(generateCmd)
 }
