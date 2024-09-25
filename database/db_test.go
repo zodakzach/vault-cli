@@ -264,7 +264,7 @@ func TestDeriveAESKey(t *testing.T) {
 	password := "mysecretpassword"
 	expected := sha256.Sum256([]byte(password))
 
-	result := DeriveAESKey(password)
+	result := deriveAESKey(password)
 	// Compare the results
 	if !equal(result, expected[:]) {
 		t.Errorf("DeriveAESKey(%q) = %x, want %x", password, result, expected[:])
@@ -286,17 +286,17 @@ func equal(a, b []byte) bool {
 
 // TestEncryptDecrypt tests the Encrypt and Decrypt functions
 func TestEncryptDecrypt(t *testing.T) {
-	key := DeriveAESKey("mysecretpassword") // Deriving the key
+	key := deriveAESKey("mysecretpassword") // Deriving the key
 	plaintext := "Hello, World!"
 
 	// Encrypt the plaintext
-	ciphertextHex, err := Encrypt(plaintext, key)
+	ciphertextHex, err := encrypt(plaintext, key)
 	if err != nil {
 		t.Fatalf("Failed to encrypt: %v", err)
 	}
 
 	// Decrypt the ciphertext
-	decryptedText, err := Decrypt(ciphertextHex, key)
+	decryptedText, err := decrypt(ciphertextHex, key)
 	if err != nil {
 		t.Fatalf("Failed to decrypt: %v", err)
 	}

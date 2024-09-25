@@ -6,7 +6,7 @@ import (
 )
 
 // GenerateRandomPassword generates a secure random password
-func GenerateRandomPassword(length int) (string, error) {
+func generateRandomPassword(length int) (string, error) {
 	bytes := make([]byte, length)
 	_, err := rand.Read(bytes)
 	if err != nil {

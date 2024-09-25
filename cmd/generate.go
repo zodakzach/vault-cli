@@ -16,7 +16,7 @@ var generateCmd = &cobra.Command{
             return
         }
 
-        password, err := GenerateRandomPassword(length)
+        password, err := generateRandomPassword(length)
         if err != nil {
             fmt.Println("Error generating password:", err)
             return

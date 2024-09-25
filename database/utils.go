@@ -28,13 +28,13 @@ func ParseIdentifierType(idType string) (IdentifierType, error) {
 }
 
 // DeriveAESKey derives a 32-byte AES key from the bcrypt-hashed password using SHA-256
-func DeriveAESKey(hashedPassword string) []byte {
+func deriveAESKey(hashedPassword string) []byte {
 	hash := sha256.Sum256([]byte(hashedPassword))
 	return hash[:]
 }
 
 // Encrypt encrypts the given plaintext using the provided key
-func Encrypt(plaintext string, key []byte) (string, error) {
+func encrypt(plaintext string, key []byte) (string, error) {
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return "", err
@@ -56,7 +56,7 @@ func Encrypt(plaintext string, key []byte) (string, error) {
 }
 
 // Decrypt decrypts the given ciphertext using the provided key
-func Decrypt(ciphertextHex string, key []byte) (string, error) {
+func decrypt(ciphertextHex string, key []byte) (string, error) {
 	// Decode the hex string
 	data, err := hex.DecodeString(ciphertextHex)
 	if err != nil {

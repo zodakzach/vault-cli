@@ -44,7 +44,7 @@ var addCmd = &cobra.Command{
 		if value == "" {
 			// Auto-generate a password if none provided
 			fmt.Println("No password entered. Generating a random password...")
-			value, err = GenerateRandomPassword(12) // Adjust the length as needed
+			value, err = generateRandomPassword(12) // Adjust the length as needed
 			if err != nil {
 				fmt.Println("Error generating password:", err)
 				return

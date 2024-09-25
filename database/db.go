@@ -139,10 +139,10 @@ func AddSensitiveData(service, identifier, value, idType string) error {
 		return fmt.Errorf("could not retrieve master password: %v", err)
 	}
 
-    key := DeriveAESKey(masterPassword.HashedPassword)
+    key := deriveAESKey(masterPassword.HashedPassword)
 
 	// Encrypt the value using the hashed master password
-	encryptedValue, err := Encrypt(value, key)
+	encryptedValue, err := encrypt(value, key)
 	if err != nil {
 		return fmt.Errorf("error encrypting sensitive data: %v", err)
 	}
@@ -182,10 +182,10 @@ func GetSensitiveData(service, identifier string) (SensitiveData, error) {
     }
 
     // Derive the encryption key from the hashed master password
-    key := DeriveAESKey(masterPassword.HashedPassword)
+    key := deriveAESKey(masterPassword.HashedPassword)
 
     // Decrypt the sensitive data value
-    decryptedValue, err := Decrypt(sensitiveData.Value, key)
+    decryptedValue, err := decrypt(sensitiveData.Value, key)
     if err != nil {
         return SensitiveData{}, fmt.Errorf("error decrypting sensitive data: %v", err)
     }
@@ -220,11 +220,11 @@ func GetAllSensitiveData(idType string) ([]SensitiveData, error) {
 		return nil, fmt.Errorf("could not retrieve master password: %v", err)
 	}
 
-    key := DeriveAESKey(masterPassword.HashedPassword)
+    key := deriveAESKey(masterPassword.HashedPassword)
 
 	// Decrypt the sensitive data values
 	for i, entry := range entries {
-		decryptedValue, err := Decrypt(entry.Value, key)
+		decryptedValue, err := decrypt(entry.Value, key)
 		if err != nil {
 			return nil, fmt.Errorf("error decrypting sensitive data: %v", err)
 		}
@@ -281,9 +281,9 @@ func UpdateSensitiveData(service, identifier, newValue, newIdentifier string) er
 			return fmt.Errorf("could not retrieve master password: %v", err)
 		}
 		// Derive the AES key from the hashed master password
-		key := DeriveAESKey(masterPassword.HashedPassword)
+		key := deriveAESKey(masterPassword.HashedPassword)
         // Encrypt the new value using the hashed master password
-        encryptedValue, err := Encrypt(newValue, key)
+        encryptedValue, err := encrypt(newValue, key)
         if err != nil {
             return fmt.Errorf("error encrypting sensitive data: %v", err)
         }
