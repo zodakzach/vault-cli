@@ -1,24 +1,26 @@
 package main
 
 import (
-    "log"
-    "os"
-    "data-manager/cmd"
-    "data-manager/database"
+	"data-manager/cmd"
+	"data-manager/database"
+	"log"
+	"os"
+	"path/filepath"
 )
 
 func main() {
-    // Get the database path from the environment variable
-    dbPath := os.Getenv("SQLITE_DB")
-    if dbPath == "" {
-        log.Fatal("SQLITE_DB environment variable is not set")
-    }
+	// Determine the database path (defaulting to user's home directory)
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		log.Fatalf("Could not get user home directory: %v", err)
+	}
+	dbPath := filepath.Join(homeDir, "vault.db") // Place it in the home directory
 
-    // Initialize the database
-    if err := database.InitDB(dbPath); err != nil {
-        log.Fatalf("Could not initialize the database: %v", err)
-    }
+	// Initialize the database
+	if err := database.InitDB(dbPath); err != nil {
+		log.Fatalf("Could not initialize the database: %v", err)
+	}
 
-    // Execute the commands
-    cmd.Execute()
+	// Execute the commands
+	cmd.Execute()
 }

@@ -6,17 +6,17 @@ import (
 	"os"
 	"strings"
 
-	"github.com/spf13/cobra"
 	db "data-manager/database"
+	"github.com/spf13/cobra"
 )
 
 var updateCmd = &cobra.Command{
-    Use:   "update",
-    Short: "Update a sensitive data entry in the vault",
-    Long:  `Update the value or identifier for a specific service in the vault.`,
-    Run: func(cmd *cobra.Command, args []string) {
-        service, _ := cmd.Flags().GetString("service")
-        identifier, _ := cmd.Flags().GetString("identifier")
+	Use:   "update",
+	Short: "Update a sensitive data entry in the vault",
+	Long:  `Update the value or identifier for a specific service in the vault.`,
+	Run: func(cmd *cobra.Command, args []string) {
+		service, _ := cmd.Flags().GetString("service")
+		identifier, _ := cmd.Flags().GetString("identifier")
 
 		// Check if the vault is locked
 		isLocked, err := db.GetVaultState()
@@ -43,23 +43,23 @@ var updateCmd = &cobra.Command{
 		// Prompt for new value (if any)
 		newValue := promptForInput("Enter new value (leave empty to keep the current one): ", existingEntry.Value)
 
-        err = db.UpdateSensitiveData(service, identifier, newValue, newIdentifier)
-        if err != nil {
-            fmt.Printf("Error updating sensitive data: %v\n", err)
-            return
-        }
-        fmt.Println("Sensitive data updated successfully.")
-    },
+		err = db.UpdateSensitiveData(service, identifier, newValue, newIdentifier)
+		if err != nil {
+			fmt.Printf("Error updating sensitive data: %v\n", err)
+			return
+		}
+		fmt.Println("Sensitive data updated successfully.")
+	},
 }
 
 func init() {
-    // Define flags for the update command
-    updateCmd.Flags().StringP("service", "s", "", "Service name (required)")
-    updateCmd.Flags().StringP("identifier", "i", "", "Identifier (required)")
-    
-    updateCmd.MarkFlagRequired("service")
-    updateCmd.MarkFlagRequired("identifier")
-    
+	// Define flags for the update command
+	updateCmd.Flags().StringP("service", "s", "", "Service name (required)")
+	updateCmd.Flags().StringP("identifier", "i", "", "Identifier (required)")
+
+	updateCmd.MarkFlagRequired("service")
+	updateCmd.MarkFlagRequired("identifier")
+
 }
 
 // promptForInput prompts the user for a new value, or keeps the existing one if the input is empty

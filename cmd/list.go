@@ -1,9 +1,9 @@
 package cmd
 
 import (
+	db "data-manager/database"
 	"fmt"
 	"github.com/spf13/cobra"
-	db "data-manager/database"
 )
 
 var listCmd = &cobra.Command{
@@ -25,7 +25,7 @@ var listCmd = &cobra.Command{
 			fmt.Println("Error: Vault is locked. Please unlock the vault using `unlock`.")
 			return
 		}
-		
+
 		// Fetch all sensitive data from the database, potentially filtering by id_type
 		entries, err := db.GetAllSensitiveData(idType)
 		if err != nil {

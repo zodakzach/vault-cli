@@ -1,9 +1,9 @@
 package vault
 
 import (
-	"testing"
 	"os"
-	
+	"testing"
+
 	db "data-manager/database" // Your package for DB interaction
 )
 
@@ -18,6 +18,7 @@ func setup() error {
 func cleanup() {
 	_ = os.Remove(testDBName) // Deletes the entire test database file
 }
+
 // TestUnlockVault tests the UnlockVault function
 func TestUnlockVault(t *testing.T) {
 	if err := setup(); err != nil {

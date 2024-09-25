@@ -20,17 +20,17 @@ var addCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		service, _ := cmd.Flags().GetString("service")
 
-        // Check if the vault is locked
-        isLocked, err := db.GetVaultState()
-        if err != nil {
-            fmt.Println("Error retrieving vault state:", err)
-            return
-        }
+		// Check if the vault is locked
+		isLocked, err := db.GetVaultState()
+		if err != nil {
+			fmt.Println("Error retrieving vault state:", err)
+			return
+		}
 
-        if isLocked {
-            fmt.Println("Error: Vault is locked. Please unlock the vault using `unlock` before adding new entries.")
-            return
-        }
+		if isLocked {
+			fmt.Println("Error: Vault is locked. Please unlock the vault using `unlock` before adding new entries.")
+			return
+		}
 
 		// Prompt for identifier type
 		idType := promptIdentifierType()

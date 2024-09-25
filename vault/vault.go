@@ -1,13 +1,13 @@
 package vault
 
 import (
+	db "data-manager/database" // Your package for DB interaction
 	"fmt"
 	"sync"
-	db "data-manager/database" // Your package for DB interaction
 )
 
 var (
-	lockMutex       sync.Mutex
+	lockMutex sync.Mutex
 )
 
 // UnlockVault unlocks the vault and updates its state in the database
@@ -46,7 +46,6 @@ func LockVault() error {
 	if err != nil {
 		return fmt.Errorf("failed to lock the vault: %v", err)
 	}
-
 
 	fmt.Println("Vault locked.")
 	return nil

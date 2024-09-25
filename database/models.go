@@ -26,6 +26,6 @@ type MasterPassword struct {
 
 // VaultState represents the state of the vault (locked or unlocked)
 type VaultState struct {
-    gorm.Model
-    IsLocked bool `gorm:"default:true"` // Default to true (locked)
+	gorm.Model
+	IsLocked bool `gorm:"default:true"` // Default to true (locked)
 }

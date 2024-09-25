@@ -1,9 +1,9 @@
 package database
 
 import (
-	"testing"
-	"os"
 	"crypto/sha256"
+	"os"
+	"testing"
 )
 
 // Test Setup and teardown
