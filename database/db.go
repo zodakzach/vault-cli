@@ -8,17 +8,19 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 var DB *gorm.DB
 
 func InitDB(dbName string) error {
-	var err error
-	DB, err = gorm.Open(sqlite.Open(dbName), &gorm.Config{})
-	if err != nil {
-		return err
-	}
-
+    var err error
+    DB, err = gorm.Open(sqlite.Open(dbName), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Silent),
+    })
+    if err != nil {
+        return err
+    }
 	// Migrate the schema
 	if err := DB.AutoMigrate(&SensitiveData{}, &MasterPassword{}, &VaultState{}); err != nil {
 		return err
