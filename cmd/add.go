@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"bufio"
-	db "data-manager/database"
+	db "vault-cli/database"
 	"fmt"
 	"os"
 	"strings"

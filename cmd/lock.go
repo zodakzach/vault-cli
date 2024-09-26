@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"data-manager/vault"
+	"vault-cli/vault"
 	"fmt"
 	"github.com/spf13/cobra"
 )

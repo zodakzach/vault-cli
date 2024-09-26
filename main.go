@@ -1,8 +1,8 @@
 package main
 
 import (
-	"data-manager/cmd"
-	"data-manager/database"
+	"vault-cli/cmd"
+	"vault-cli/database"
 	"log"
 	"os"
 	"path/filepath"

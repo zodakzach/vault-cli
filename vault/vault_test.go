@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	db "data-manager/database" // Your package for DB interaction
+	db "vault-cli/database" // Your package for DB interaction
 )
 
 const testDBName = "test_vault.db"

@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	db "data-manager/database"
+	db "vault-cli/database"
 	"fmt"
 
 	"github.com/spf13/cobra"

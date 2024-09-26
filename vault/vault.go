@@ -1,7 +1,7 @@
 package vault
 
 import (
-	db "data-manager/database" // Your package for DB interaction
+	db "vault-cli/database" // Your package for DB interaction
 	"fmt"
 	"sync"
 )

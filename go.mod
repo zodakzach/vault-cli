@@ -1,4 +1,4 @@
-module data-manager
+module vault-cli
 
 go 1.22.1
 

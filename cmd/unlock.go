@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	db "data-manager/database"
-	"data-manager/vault" // Make sure to import the vault package for timer control
+	db "vault-cli/database"
+	"vault-cli/vault" // Make sure to import the vault package for timer control
 	"fmt"
 	"github.com/spf13/cobra"
 )
@@ -15,7 +15,7 @@ var unlockCmd = &cobra.Command{
 		password, _ := cmd.Flags().GetString("password")
 
 		if err := db.CheckMasterPasswordSet(); err != nil {
-			fmt.Println(err)
+			fmt.Println("Error:", err)
 			return
 		}
 

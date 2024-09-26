@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	db "data-manager/database"
+	db "vault-cli/database"
 	"github.com/spf13/cobra"
 )
 
