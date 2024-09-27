@@ -1,8 +1,10 @@
 package cmd
 
 import (
-	db "vault-cli/database"
 	"fmt"
+	"strings"
+	db "vault-cli/database"
+
 	"github.com/spf13/cobra"
 )
 
@@ -37,21 +39,31 @@ var listCmd = &cobra.Command{
 			fmt.Println("No data found in the vault.")
 			return
 		}
-
-		// Group and display the entries by service
-		fmt.Println("Stored services and their identifiers:")
+		fmt.Println("Stored Services and Identifiers:")
+		fmt.Println("--------------------------------")
+	
 		serviceMap := make(map[string][]db.SensitiveData)
-
+	
 		// Group entries by service
 		for _, entry := range entries {
 			serviceMap[entry.Service] = append(serviceMap[entry.Service], entry)
 		}
-
-		// Display the grouped services and identifiers
+	
+		// Header with color
+		fmt.Printf("\033[1;37m%-20s | %-10s | %-30s\033[0m\n", "Service", "Type", "Identifier")
+		fmt.Println(strings.Repeat("-", 65))
+	
+		// Display grouped services with alternating colors
+		alternate := false
 		for service, entries := range serviceMap {
-			fmt.Printf("Service: %s\n", service)
 			for _, entry := range entries {
-				fmt.Printf("  %s: %s\n", entry.IdentifierType, entry.Identifier) // Print id_type and identifier
+				// Switch row colors: Light Gray for odd rows, Normal for even rows
+				if alternate {
+					fmt.Printf("\033[0;37m%-20s | %-10s | %-30s\033[0m\n", service, entry.IdentifierType, entry.Identifier)
+				} else {
+					fmt.Printf("%-20s | %-10s | %-30s\n", service, entry.IdentifierType, entry.Identifier)
+				}
+				alternate = !alternate
 			}
 		}
 	},
