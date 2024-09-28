@@ -294,7 +294,7 @@ func UpdateSensitiveData(service, identifier, newValue, newIdentifier string) er
 
 	// Update the identifier if a new identifier is provided
 	if newIdentifier != "" {
-		entry.Identifier = newIdentifier // Update the identifier
+		entry.Identifier = normalizedIdentifier // Update the identifier
 	}
 
 	// Save the updated entry
