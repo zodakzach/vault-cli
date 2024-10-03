@@ -125,10 +125,6 @@ func CheckMasterPasswordSet() error {
 }
 
 func AddSensitiveData(service, identifier, value, idType string) error {
-	// Normalize service and identifier to lowercase
-	normalizedService := strings.ToLower(service)
-	normalizedIdentifier := strings.ToLower(identifier)
-
 	// Use the utility function to validate and convert idType
 	identifierType, err := ParseIdentifierType(idType)
 	if err != nil {
@@ -150,8 +146,8 @@ func AddSensitiveData(service, identifier, value, idType string) error {
 	}
 
 	sensitiveData := SensitiveData{
-		Service:        normalizedService,
-		Identifier:     normalizedIdentifier,
+		Service:        service,
+		Identifier:     identifier,
 		Value:          encryptedValue,
 		IdentifierType: identifierType,
 	}
@@ -166,8 +162,8 @@ func GetSensitiveData(service, identifier string) (SensitiveData, error) {
 	normalizedIdentifier := strings.ToLower(identifier)
 
 	// Query database for matching service and identifier
-	err := DB.Where("service = ?", normalizedService).
-		Where("identifier = ?", normalizedIdentifier).
+	err := DB.Where("LOWER(service) = ?", normalizedService).
+		Where("LOWER(identifier) = ?", normalizedIdentifier).
 		First(&sensitiveData).Error
 
 	if err != nil {
@@ -243,7 +239,7 @@ func DeleteSensitiveData(service, identifier string) error {
 	normalizedIdentifier := strings.ToLower(identifier)
 
 	// Attempt to find the entry based on service and identifier
-	err := DB.Where("service = ? AND identifier = ?", normalizedService, normalizedIdentifier).First(&entry).Error
+	err := DB.Where("LOWER(service) = ? AND LOWER(identifier) = ?", normalizedService, normalizedIdentifier).First(&entry).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return fmt.Errorf("no entry found for service '%s' and identifier '%s'", service, identifier)
@@ -267,7 +263,7 @@ func UpdateSensitiveData(service, identifier, newValue, newIdentifier string) er
 	normalizedIdentifier := strings.ToLower(identifier)
 
 	// Find the existing entry based on the service and identifier
-	err := DB.Where("service = ? AND identifier = ?", normalizedService, normalizedIdentifier).First(&entry).Error
+	err := DB.Where("LOWER(service) = ? AND LOWER(identifier) = ?", normalizedService, normalizedIdentifier).First(&entry).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return fmt.Errorf("no entry found for service '%s' and identifier '%s'", service, identifier)
@@ -294,7 +290,7 @@ func UpdateSensitiveData(service, identifier, newValue, newIdentifier string) er
 
 	// Update the identifier if a new identifier is provided
 	if newIdentifier != "" {
-		entry.Identifier = normalizedIdentifier // Update the identifier
+		entry.Identifier = newIdentifier // Update the identifier
 	}
 
 	// Save the updated entry
